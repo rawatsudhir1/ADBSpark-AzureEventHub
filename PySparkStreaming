@@ -1,0 +1,26 @@
+from pyspark.sql.types import *
+from pyspark.sql.functions import *
+
+connectionString = "Endpoint=sb://XXXXXXX.servicebus.windows.net/;SharedAccessKeyName=iothubowner;SharedAccessKey=XXXX;EntityPath=XX"
+ehConf = {}
+ehConf['eventhubs.connectionString'] = connectionString
+
+inputStream = spark \
+  .readStream \
+  .format("eventhubs") \
+  .options(**ehConf) \
+  .load()
+ 
+schema = StructType()\
+        .add("Column1", StringType())\
+        .add("Column2", StringType())\
+        .add("Column3", StringType())\
+        .add("Column4", StringType())\
+        .add("Column6", StringType())\
+        .add("Column6", StringType())
+
+entries = (inputStream
+            .selectExpr("CAST(body as STRING)")
+            .select(from_json(col("body"), schema).alias("data")))
+
+display(entries)
